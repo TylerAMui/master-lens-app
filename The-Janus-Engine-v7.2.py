@@ -1137,20 +1137,6 @@ if display_analysis_form:
                     # Display the image preview (Streamlit handles this efficiently)
                     st.image(uploaded_file, caption="Preview", use_column_width=True)
 
-                except Exception as e:
-                    st.error(f"Error processing image: {e}")
-                    work_input.uploaded_file_obj = None
-
-        elif work_input.modality == M_AUDIO:
-            uploaded_file = st.file_uploader("Upload Audio (MP3, WAV, FLAC, M4A, OGG, MP4):", type=["mp3", "wav", "flac", "m4a", "ogg", "mp4"], key=f"{ui_key_prefix}_audio")
-            if uploaded_file is not None:
-                # Store the UploadedFile object (needed for File API)
-                work_input.uploaded_file_obj = uploaded_file
-                
-                # Display audio player
-                st.audio(uploaded_file)
-
-
 if display_analysis_form:
     st.header(header_text)
 
