@@ -1,4 +1,4 @@
-# The Janus Engine v7.1 (Holistic Inquiry Architecture)
+# The Janus Engine v7.2 (Holistic Inquiry Architecture)
 import streamlit as st
 import google.generativeai as genai
 import textwrap
@@ -14,14 +14,14 @@ logging.basicConfig(level=logging.INFO)
 # --- PAGE CONFIGURATION ---
 try:
     st.set_page_config(
-        page_title="The Janus Engine v7.1",
+        page_title="The Janus Engine v7.2",
         page_icon="🏛️",
         layout="wide"
     )
 except st.errors.StreamlitAPIException:
     pass # Avoid error if config is called multiple times during reruns
 
-st.title("🏛️ The Janus Engine v7.1")
+st.title("🏛️ The Janus Engine v7.2")
 st.write("An AI-powered pedagogical platform utilizing a meta-prompt architecture and a holistic lens library for intuitive, multi-perspective analysis.")
 
 # --- CONSTANTS & DIRECTIVES ---
@@ -48,15 +48,34 @@ ANALYSIS_MODES = (A_SINGLE, A_DIALECTICAL, A_SYMPOSIUM, A_COMPARATIVE)
 VIEW_LIBRARY = "View by Discipline (Library)"
 VIEW_WORKSHOP = "View by Function (Workshop)"
 
-# --- LENSES HIERARCHY & MAPPINGS (v7.1 Expansion) ---
+# --- LENSES HIERARCHY & MAPPINGS (v7.2 Expansion) ---
 
 # This structure is used for the "Library" view (View by Discipline)
-# Requirement 3: Lens Library Expansion: Spiritual & Esoteric
+# Requirement 2: Lens Library Expansion: Aesthetics & Communication (v7.2)
 LENSES_HIERARCHY = {
     "Structural & Formalist": ["Formalist", "Structuralism", "Narratology", "Semiotics", "Computational Analysis/Digital Humanities"],
     "Psychological": ["Jungian", "Freudian", "Evolutionary Psychology", "Behaviorism", "Lacanian"],
     "Philosophical": ["Existentialist", "Taoist", "Phenomenological", "Stoicism", "Platonism", "Nietzschean", "Absurdism"],
     "Socio-Political": ["Marxist", "Feminist", "Post-Colonial", "Queer Theory"],
+    
+    # --- v7.2 New Category: Art History & Aesthetics ---
+    "Art History & Aesthetics": [
+        "Aestheticism",
+        "Cubism",
+        "Surrealism",
+        "Iconography/Iconology",
+        "Formalist Art Criticism",
+        "Impressionism"
+    ],
+    
+    # --- v7.2 New Category: Communication & Media Theory ---
+    "Communication & Media Theory": [
+        "Rhetorical Analysis",
+        "Media Ecology (McLuhan)",
+        "Agenda-Setting Theory",
+        "Uses and Gratifications Theory"
+    ],
+
     "Ethical Frameworks": ["Utilitarianism", "Virtue Ethics", "Deontology (Kantian)", "Bioethics"],
     "Scientific & STEM Perspectives": [
         "Cognitive Science", "Systems Theory (Complexity)", "Ecocriticism",
@@ -99,7 +118,7 @@ def flatten_lenses(lenses_hierarchy):
         flat_lenses.extend(lens_list)
     return sorted(list(set(flat_lenses))) # Use set to ensure uniqueness
 
-# Requirement 1: Helper function for the new Multi-Stage selection UI
+# Helper function for the Multi-Stage selection UI (Used only by Symposium now)
 def get_filtered_lenses(hierarchy, selected_categories):
     """Filters lenses based on selected categories from a hierarchy."""
     filtered_lenses = []
@@ -112,21 +131,28 @@ def get_filtered_lenses(hierarchy, selected_categories):
 def create_functional_mapping(lenses_hierarchy):
     """Maps lenses from the hierarchy to the Three Tiers of Inquiry."""
     # This mapping defines the "Workshop" view (View by Function)
-    # Updated for v7.1 to include the new Spiritual & Esoteric lenses.
+    # Updated for v7.2 to include the new Aesthetics & Communication lenses.
     mapping = {
         "Contextual (What, Who, Where, When)": [
             "Biographical", "Historical Context", "Reader-Response",
             "Epidemiology", "Supply Chain Analysis", "Astrophysics/Cosmology",
-            # v7.1 additions
             "Quranic Studies (Islam)",
             "Rabbinic Thought (Judaism)",
+            # v7.2 additions
+            "Iconography/Iconology",
+            "Agenda-Setting Theory",
         ],
         "Mechanical (How)": [
             "Formalist", "Structuralism", "Narratology", "Semiotics",
             "Systems Theory (Complexity)", "Cognitive Science", "Behaviorism",
             "Game Theory", "Behavioral Economics",
             "Computational Analysis/Digital Humanities", "Materials Science",
-            "Legal Positivism"
+            "Legal Positivism",
+            # v7.2 additions
+            "Cubism",
+            "Formalist Art Criticism",
+            "Impressionism",
+            "Rhetorical Analysis",
         ],
         "Interpretive (Why)": [
             "Jungian", "Freudian", "Lacanian", "Evolutionary Psychology",
@@ -135,7 +161,7 @@ def create_functional_mapping(lenses_hierarchy):
             "Utilitarianism", "Virtue Ethics", "Deontology (Kantian)", "Bioethics",
             "Ecocriticism",
             "Critical Legal Studies",
-            # v7.1 additions (replaces previous spiritual lenses)
+            # Spiritual/Esoteric (retained)
             "Animism",
             "Bhakti Yoga (Hindu Devotion)",
             "Buddhist Philosophy (General)",
@@ -151,6 +177,11 @@ def create_functional_mapping(lenses_hierarchy):
             "Vedanta (Hindu Philosophy)",
             "Western Esotericism",
             "Zen Buddhism",
+            # v7.2 additions
+            "Aestheticism",
+            "Surrealism",
+            "Media Ecology (McLuhan)",
+            "Uses and Gratifications Theory",
         ]
     }
     
@@ -170,7 +201,7 @@ def create_functional_mapping(lenses_hierarchy):
 
 # Initialize the functional mapping and the flattened list
 LENSES_FUNCTIONAL = create_functional_mapping(LENSES_HIERARCHY)
-# SORTED_LENS_NAMES is now primarily used for data integrity checks, not directly in the UI multiselects
+# SORTED_LENS_NAMES is now primarily used for data integrity checks
 SORTED_LENS_NAMES = flatten_lenses(LENSES_HIERARCHY)
 
 
@@ -194,7 +225,7 @@ class WorkInput:
         return self.title if self.title else "(Untitled)"
 
 # --- GEMINI FUNCTIONS ---
-# (Gemini and Core Generation functions are unchanged from v7.0 but included for completeness)
+# (Gemini and Core Generation functions are unchanged but included for completeness)
 
 def get_model(api_key):
     """Configures and returns the Gemini model."""
@@ -527,7 +558,7 @@ if 'analysis_mode' not in st.session_state:
 if 'api_key' not in st.session_state:
     st.session_state.api_key = ""
 
-# --- SIDEBAR FOR SETUP & PROTOCOL SELECTION (v7.1 Redesign) ---
+# --- SIDEBAR FOR SETUP & PROTOCOL SELECTION (v7.2 Redesign) ---
 
 with st.sidebar:
     st.header("🏛️ Janus Protocol")
@@ -552,7 +583,14 @@ with st.sidebar:
         current_mode_index = 0
 
     analysis_mode = st.radio("Select Protocol:", ANALYSIS_MODES, index=current_mode_index)
-    st.session_state.analysis_mode = analysis_mode
+    
+    # If the mode changes, we must reset the selection state to avoid conflicts between selection UIs
+    # This is crucial when switching between modes with different selection structures (e.g., list vs string)
+    if analysis_mode != st.session_state.analysis_mode:
+        st.session_state.analysis_mode = analysis_mode
+        st.session_state.selection = None 
+        # Rerun is necessary to ensure UI components (especially those with specific keys) update correctly
+        st.rerun() 
 
     # Context-Dependent Information
     if analysis_mode == A_SINGLE:
@@ -566,10 +604,10 @@ with st.sidebar:
 
     st.markdown("---")
     
-    # 3. Primary Control: Lens Selection (v7.1 UI Evolution)
+    # 3. Primary Control: Lens Selection (v7.2 UI Evolution)
     st.subheader("🔬 Lens Selection")
 
-    # --- Requirement 2: Help System Refinement for Progressive Disclosure ---
+    # --- Help System Refinement (Progressive Disclosure) ---
     
     # Layout for Toggle and Help Icon
     col_view, col_help = st.columns([4, 1])
@@ -580,7 +618,6 @@ with st.sidebar:
             "View Lenses As:",
             (VIEW_LIBRARY, VIEW_WORKSHOP),
             index=0,
-            # Refined On Hover explanation (v7.1)
             help="Switch views. Click the ❓ icon for details on the Library vs. Workshop structure." 
         )
 
@@ -589,7 +626,6 @@ with st.sidebar:
         st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
         
         # On Click detailed explanation (Progressive Disclosure)
-        # Refined Popover Visuals: Condensed Content (v7.1)
         with st.popover("❓"):
             st.markdown("#### 🏛️ Library vs. Workshop")
             st.markdown(f"**{VIEW_LIBRARY}:** Organized by academic discipline. Best for finding known frameworks.")
@@ -597,7 +633,6 @@ with st.sidebar:
             
             st.markdown("---")
             st.markdown("##### The Three Tiers of Inquiry")
-            # Aggressively condensed text using markdown bullet points
             st.markdown(
                 """
                 * **1. Contextual (What/Who/When):** Establishes background and facts.
@@ -606,7 +641,7 @@ with st.sidebar:
                 """
             )
 
-    # Determine which hierarchy and labels to use based on the view mode (v7.1 Update for Multi-select)
+    # Determine which hierarchy and labels to use based on the view mode
     if view_mode == VIEW_LIBRARY:
         current_hierarchy = LENSES_HIERARCHY
         category_label_single = "1. Discipline Category:"
@@ -654,21 +689,93 @@ with st.sidebar:
         else:
             st.session_state.selection = None
 
-    # Requirement 1: Critical UI Bug Fix: Multi-Select Lens Selection (v7.1)
-    elif analysis_mode in [A_DIALECTICAL, A_SYMPOSIUM]:
+    # Requirement 1: Critical UI Overhaul: Independent Dialectical Selection (v7.2)
+    elif analysis_mode == A_DIALECTICAL:
+        st.caption("Select two independent lenses (Thesis and Antithesis).")
+
+        # Use columns for side-by-side selection, visually "nested" appearance
+        col_lens_a, col_lens_b = st.columns(2)
+        
+        # Initialize variables
+        lens_a = None
+        lens_b = None
+
+        # --- Lens A (Thesis) Pathway ---
+        with col_lens_a:
+            # Use a container for visual definition and structure
+            with st.container(border=True):
+                st.markdown("🏛️ **Lens A (Thesis)**")
+                # Stage 1: Category/Tier Selection
+                # Use unique keys (e.g., "dialectic_cat_a") for independent widgets
+                category_a = st.selectbox(
+                    category_label_single,
+                    options=sorted(list(current_hierarchy.keys())),
+                    index=None,
+                    placeholder="Category...",
+                    key="dialectic_cat_a", 
+                    label_visibility="collapsed" # Cleaner look for nested UI
+                )
+
+                # Stage 2: Specific Lens Selection
+                if category_a:
+                    lens_options_a = current_hierarchy[category_a]
+                    lens_a = st.selectbox(
+                        "Specific Lens A:",
+                        options=lens_options_a,
+                        index=None,
+                        placeholder="Lens...",
+                        key="dialectic_lens_a",
+                        label_visibility="collapsed"
+                    )
+
+        # --- Lens B (Antithesis) Pathway ---
+        with col_lens_b:
+             with st.container(border=True):
+                st.markdown("🏛️ **Lens B (Antithesis)**")
+                # Stage 1: Category/Tier Selection
+                category_b = st.selectbox(
+                    category_label_single,
+                    options=sorted(list(current_hierarchy.keys())),
+                    index=None,
+                    placeholder="Category...",
+                    key="dialectic_cat_b",
+                    label_visibility="collapsed"
+                )
+
+                # Stage 2: Specific Lens Selection
+                if category_b:
+                    # Ensure options dynamically update based on Category B
+                    lens_options_b = current_hierarchy[category_b]
+                    lens_b = st.selectbox(
+                        "Specific Lens B:",
+                        options=lens_options_b,
+                        index=None,
+                        placeholder="Lens...",
+                        key="dialectic_lens_b",
+                        label_visibility="collapsed"
+                    )
+
+        # Validation and Session State Update
+        if lens_a and lens_b:
+            if lens_a == lens_b:
+                st.warning("Please select two different lenses for the dialogue.")
+                st.session_state.selection = []
+            else:
+                # Valid selection, store as a list
+                st.session_state.selection = [lens_a, lens_b]
+        else:
+            st.session_state.selection = []
+
+
+    # Multi-Select Lens Selection for Symposium (Kept from v7.1 logic, separated from Dialectical)
+    elif analysis_mode == A_SYMPOSIUM:
         # Implement Multi-Stage Selection respecting the current_hierarchy
 
         # Determine constraints and labels
-        if analysis_mode == A_DIALECTICAL:
-            st.caption("Select exactly two lenses to synthesize.")
-            max_selections = 2
-            min_selections = 2
-            lens_label = "2. Select Exactly Two Lenses:"
-        else: # A_SYMPOSIUM
-            st.caption("Select three or more lenses for the symposium.")
-            max_selections = None # No max
-            min_selections = 3
-            lens_label = "2. Select Lenses (Minimum 3):"
+        st.caption("Select three or more lenses for the symposium.")
+        max_selections = None # No max
+        min_selections = 3
+        lens_label = "2. Select Lenses (Minimum 3):"
 
         # Stage 1: Category/Tier Selection
         selected_categories = st.multiselect(
@@ -682,7 +789,7 @@ with st.sidebar:
             # Dynamically populate the lens options using the helper function
             available_lenses = get_filtered_lenses(current_hierarchy, selected_categories)
             
-            # Use a container for visual nesting (v7.1 refinement)
+            # Use a container for visual nesting
             with st.container(border=True):
                 selected_lenses = st.multiselect(
                     lens_label,
@@ -691,7 +798,7 @@ with st.sidebar:
                     placeholder="Choose lenses from selected categories..."
                 )
             
-            # Validation for minimum selection (Streamlit handles max, but we must check min)
+            # Validation for minimum selection
             if len(selected_lenses) > 0 and len(selected_lenses) < min_selections:
                 # If they started selecting but haven't met the minimum
                 st.warning(f"Please select at least {min_selections} lenses.")
@@ -736,26 +843,25 @@ elif st.session_state.analysis_mode == A_DIALECTICAL:
     selection = st.session_state.selection
     header_text = f"{A_DIALECTICAL}"
 
-    # Check if selection exists AND the length is exactly 2 (v7.1 validation update)
+    # Check if selection exists AND the length is exactly 2
     if selection and len(selection) == 2:
         display_analysis_form = True
         header_text += f" | {selection[0]} vs. {selection[1]}"
-        st.info("Ready to synthesize these two distinct viewpoints on a single work.")
+        st.info(f"Ready to synthesize **{selection[0]}** (Thesis) and **{selection[1]}** (Antithesis) on a single work.")
     else:
-        # The sidebar handles the detailed warning if the count is wrong; this is the initial state message.
-        st.info("⬅️ Please select two lenses using the multi-stage selector in the sidebar.")
+        # The sidebar handles the detailed warning; this is the initial state message.
+        st.info("⬅️ Please select Lens A (Thesis) and Lens B (Antithesis) using the independent selectors in the sidebar.")
 
 elif st.session_state.analysis_mode == A_SYMPOSIUM:
     selection = st.session_state.selection
     header_text = f"{A_SYMPOSIUM}"
 
-    # Check if selection exists AND the length is 3 or more (v7.1 validation update)
+    # Check if selection exists AND the length is 3 or more
     if selection and len(selection) >= 3:
         display_analysis_form = True
         header_text += f" | {len(selection)} Lenses"
         st.info(f"Ready to host a symposium between: {', '.join(selection)}")
     else:
-        # The sidebar handles the detailed warning if the count is wrong; this is the initial state message.
         st.info("⬅️ Please select three or more lenses using the multi-stage selector in the sidebar.")
 
 elif st.session_state.analysis_mode == A_COMPARATIVE:
@@ -790,6 +896,241 @@ def handle_input_ui(work_input: WorkInput, container, ui_key_prefix):
             uploaded_file = st.file_uploader("Upload Image (JPG, PNG, WEBP, HEIC, HEIF):", type=["jpg", "jpeg", "png", "webp", "heic", "heif"], key=f"{ui_key_prefix}_image")
             if uploaded_file is not None:
                 try:
+                    # Store the UploadedFile object (needed for File API)
+                    work_input.uploaded_file_obj = uploaded_file
+                    
+                    # Display the image preview (Streamlit handles this efficiently)
+                    st.image(uploaded_file, caption="Preview", use_column_width=True)
+
+                except Exception as e:
+                    st.error(f"Error processing image: {e}")
+                    work_input.uploaded_file_obj = None
+
+        elif work_input.modality == M_AUDIO:
+            uploaded_file = st.file_uploader("Upload Audio (MP3, WAV, FLAC, M4A, OGG, MP4):", type=["mp3", "wav", "flac", "m4a", "ogg", "mp4"], key=f"{ui_key_prefix}_audio")
+            if uploaded_file is not None:
+                # Store the UploadedFile object (needed for File API)
+                work_input.uploaded_file_obj = uploaded_file
+                
+                # Display audio player
+                st.audio(uploaded_file)
+
+
+if display_analysis_form:
+    st.header(header_text)
+
+    if st.session_state.analysis_mode in [A_SINGLE, A_DIALECTICAL, A_SYMPOSIUM]:
+        # Single Input UI
+        st.subheader("Input Work")
+        handle_input_ui(work_a, st.container(border=True), "work_single")
+
+    elif st.session_state.analysis_mode == A_COMPARATIVE:
+        # Dual Input UI
+        st.subheader("Input Works for Comparison")
+        col_a, col_b = st.columns(2)
+
+        with col_a:
+            st.markdown("### 🏛️ Work A")
+            handle_input_ui(work_a, st.container(border=True), "work_a")
+
+        with col_b:
+            st.markdown("### 🏛️ Work B")
+            handle_input_ui(work_b, st.container(border=True), "work_b")
+
+
+    # --- EXECUTION BUTTON ---
+    st.markdown("---")
+    # Use a container for execution and results management
+    execution_container = st.container()
+
+    with execution_container:
+        if st.button("Execute Analysis Engine", type="primary", use_container_width=True):
+            # Validation
+            is_valid = True
+            if not api_key:
+                st.warning("Please enter your Gemini API Key in the sidebar (under ⚙️ Settings).")
+                is_valid = False
+
+            if not work_a.is_ready():
+                st.warning("Please provide the creative work (Work A) to be analyzed.")
+                is_valid = False
+
+            if st.session_state.analysis_mode == A_COMPARATIVE and not work_b.is_ready():
+                st.warning("Please provide the second creative work (Work B) for comparison.")
+                is_valid = False
+
+            if is_valid:
+                # --- Execution Block ---
+                model = get_model(api_key)
+                if model:
+                    st.markdown("---")
+                    # Dedicated area for results
+                    results_area = st.container()
+
+                    with results_area:
+                        # --- Mode 1: Single Lens Execution ---
+                        if st.session_state.analysis_mode == A_SINGLE:
+                            lens_keyword = st.session_state.selection
+                            
+                            # generate_analysis handles the full General/Soldier flow
+                            analysis_text = generate_analysis(
+                                model,
+                                lens_keyword,
+                                work_a
+                            )
+
+                            if analysis_text:
+                                st.header("Analysis Result")
+                                st.markdown(analysis_text)
+
+                        # --- Mode 2: Dialectical Dialogue Execution ---
+                        elif st.session_state.analysis_mode == A_DIALECTICAL:
+                            lens_a_name = st.session_state.selection[0]
+                            lens_b_name = st.session_state.selection[1]
+
+                            # Call 1 (Part A): Generate Thesis
+                            st.subheader(f"Step 1/3: Thesis ({lens_a_name})")
+                            analysis_a = generate_analysis(
+                                model,
+                                lens_a_name,
+                                work_a
+                            )
+
+                            # Call 1 (Part B): Generate Antithesis
+                            analysis_b = None
+                            if analysis_a:
+                                st.subheader(f"Step 2/3: Antithesis ({lens_b_name})")
+                                analysis_b = generate_analysis(
+                                    model,
+                                    lens_b_name,
+                                    work_a
+                                )
+
+                            # Call 2: Synthesis
+                            if analysis_a and analysis_b:
+                                st.subheader("Step 3/3: Synthesis (Aufheben)")
+                                with st.spinner("Synthesizing the dialogue..."):
+                                    dialogue_text = generate_dialectical_synthesis(
+                                        model,
+                                        lens_a_name,
+                                        analysis_a,
+                                        lens_b_name,
+                                        analysis_b,
+                                        work_a.get_display_title()
+                                    )
+
+                                if dialogue_text:
+                                    st.header("Dialectical Dialogue Result")
+                                    st.markdown(dialogue_text)
+
+                                    # Display the raw analyses for reference
+                                    st.markdown("---")
+                                    st.subheader("Source Analyses (Reference)")
+                                    with st.expander(f"View Raw Analysis A: {lens_a_name}"):
+                                        st.markdown(analysis_a)
+                                    with st.expander(f"View Raw Analysis B: {lens_b_name}"):
+                                        st.markdown(analysis_b)
+                            else:
+                                st.error("Could not generate the initial analyses. Cannot proceed to synthesis.")
+
+                        # --- Mode 3: Symposium Execution ---
+                        elif st.session_state.analysis_mode == A_SYMPOSIUM:
+                            selected_lenses = st.session_state.selection
+                            analyses_results = {}
+                            N = len(selected_lenses)
+                            total_steps = N + 1
+                            
+                            # Flag to track if execution should continue
+                            continue_execution = True
+
+                            # Step 1-N: Generate individual analyses
+                            for i, lens_name in enumerate(selected_lenses):
+                                if not continue_execution:
+                                    break
+                                    
+                                st.subheader(f"Step {i+1}/{total_steps}: Analyzing ({lens_name})")
+                                analysis_text = generate_analysis(
+                                    model,
+                                    lens_name,
+                                    work_a
+                                )
+                                if analysis_text:
+                                    analyses_results[lens_name] = analysis_text
+                                else:
+                                    st.error(f"Failed to generate analysis for {lens_name}. Halting execution.")
+                                    continue_execution = False
+
+                            # Step N+1: Synthesis
+                            if continue_execution:
+                                st.subheader(f"Step {total_steps}/{total_steps}: Symposium Synthesis")
+                                with st.spinner("Synthesizing the symposium dialogue..."):
+                                    symposium_text = generate_symposium_synthesis(
+                                        model,
+                                        analyses_results,
+                                        work_a.get_display_title()
+                                    )
+
+                                if symposium_text:
+                                    st.header("Symposium Dialogue Result")
+                                    st.markdown(symposium_text)
+
+                                    # Display the raw analyses for reference
+                                    st.markdown("---")
+                                    st.subheader("Source Analyses (Reference)")
+                                    for lens_name, analysis_text in analyses_results.items():
+                                        with st.expander(f"View Raw Analysis: {lens_name}"):
+                                            st.markdown(analysis_text)
+
+                        # --- Mode 4: Comparative Synthesis Execution ---
+                        elif st.session_state.analysis_mode == A_COMPARATIVE:
+                            lens_name = st.session_state.selection
+
+                            # Call 1: Analyze Work A
+                            st.subheader(f"Step 1/3: Analyzing Work A")
+                            # The General will tailor the prompt specifically to Work A
+                            analysis_a = generate_analysis(
+                                model,
+                                lens_name,
+                                work_a
+                            )
+
+                            # Call 2: Analyze Work B
+                            analysis_b = None
+                            if analysis_a:
+                                st.subheader(f"Step 2/3: Analyzing Work B")
+                                # The General must be called again to tailor the prompt specifically to Work B
+                                analysis_b = generate_analysis(
+                                    model,
+                                    lens_name,
+                                    work_b
+                                )
+
+                            # Call 3: Comparative Synthesis
+                            if analysis_a and analysis_b:
+                                st.subheader("Step 3/3: Comparative Synthesis")
+                                with st.spinner("Generating comparative synthesis..."):
+                                    synthesis_text = generate_comparative_synthesis(
+                                        model,
+                                        lens_name,
+                                        analysis_a,
+                                        work_a.get_display_title(),
+                                        analysis_b,
+                                        work_b.get_display_title()
+                                    )
+
+                                if synthesis_text:
+                                    st.header("Comparative Synthesis Result")
+                                    st.markdown(synthesis_text)
+
+                                    # Display the raw analyses for reference
+                                    st.markdown("---")
+                                    st.subheader("Source Analyses (Reference)")
+                                    with st.expander(f"View Raw Analysis A: {work_a.get_display_title()}"):
+                                        st.markdown(analysis_a)
+                                    with st.expander(f"View Raw Analysis B: {work_b.get_display_title()}"):
+                                        st.markdown(analysis_b)
+                            else:
+                                st.error("Could not generate the initial analyses. Cannot proceed to comparison.")
                     # Store the UploadedFile object (needed for File API)
                     work_input.uploaded_file_obj = uploaded_file
                     
