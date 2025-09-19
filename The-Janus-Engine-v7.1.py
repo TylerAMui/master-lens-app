@@ -1,4 +1,4 @@
-# The Janus Engine v7.0 (Holistic Inquiry Architecture)
+# The Janus Engine v7.1 (Holistic Inquiry Architecture)
 import streamlit as st
 import google.generativeai as genai
 import textwrap
@@ -14,14 +14,14 @@ logging.basicConfig(level=logging.INFO)
 # --- PAGE CONFIGURATION ---
 try:
     st.set_page_config(
-        page_title="The Janus Engine v7.0",
+        page_title="The Janus Engine v7.1",
         page_icon="🏛️",
         layout="wide"
     )
 except st.errors.StreamlitAPIException:
     pass # Avoid error if config is called multiple times during reruns
 
-st.title("🏛️ The Janus Engine v7.0")
+st.title("🏛️ The Janus Engine v7.1")
 st.write("An AI-powered pedagogical platform utilizing a meta-prompt architecture and a holistic lens library for intuitive, multi-perspective analysis.")
 
 # --- CONSTANTS & DIRECTIVES ---
@@ -44,31 +44,49 @@ A_SYMPOSIUM = "Symposium (3+ Lenses)"
 A_COMPARATIVE = "Comparative Synthesis (2 Works)"
 ANALYSIS_MODES = (A_SINGLE, A_DIALECTICAL, A_SYMPOSIUM, A_COMPARATIVE)
 
-# Constants for UI Views (v7.0)
+# Constants for UI Views
 VIEW_LIBRARY = "View by Discipline (Library)"
 VIEW_WORKSHOP = "View by Function (Workshop)"
 
-# --- LENSES HIERARCHY & MAPPINGS (v7.0 Expansion) ---
+# --- LENSES HIERARCHY & MAPPINGS (v7.1 Expansion) ---
 
-# Requirement 3: Lens Library Expansion (Adding STEM, Economics, Law)
 # This structure is used for the "Library" view (View by Discipline)
+# Requirement 3: Lens Library Expansion: Spiritual & Esoteric
 LENSES_HIERARCHY = {
-    "Structural & Formalist": ["Formalist", "Structuralism", "Narratology", "Semiotics", "Computational Analysis/Digital Humanities"], # New
+    "Structural & Formalist": ["Formalist", "Structuralism", "Narratology", "Semiotics", "Computational Analysis/Digital Humanities"],
     "Psychological": ["Jungian", "Freudian", "Evolutionary Psychology", "Behaviorism", "Lacanian"],
     "Philosophical": ["Existentialist", "Taoist", "Phenomenological", "Stoicism", "Platonism", "Nietzschean", "Absurdism"],
     "Socio-Political": ["Marxist", "Feminist", "Post-Colonial", "Queer Theory"],
-    "Ethical Frameworks": ["Utilitarianism", "Virtue Ethics", "Deontology (Kantian)", "Bioethics"], # New
+    "Ethical Frameworks": ["Utilitarianism", "Virtue Ethics", "Deontology (Kantian)", "Bioethics"],
     "Scientific & STEM Perspectives": [
         "Cognitive Science", "Systems Theory (Complexity)", "Ecocriticism",
-        "Astrophysics/Cosmology", "Materials Science", "Epidemiology" # New
+        "Astrophysics/Cosmology", "Materials Science", "Epidemiology"
     ],
     "Economics & Systems": [
-        "Game Theory", "Behavioral Economics", "Supply Chain Analysis" # New
+        "Game Theory", "Behavioral Economics", "Supply Chain Analysis"
     ],
     "Law & Governance": [
-        "Legal Positivism", "Critical Legal Studies" # New
+        "Legal Positivism", "Critical Legal Studies"
     ],
-    "Spiritual & Esoteric": ["Buddhist Philosophy", "Western Esotericism", "Mysticism"],
+    "Spiritual & Esoteric": [
+        "Animism",
+        "Bhakti Yoga (Hindu Devotion)",
+        "Buddhist Philosophy (General)",
+        "Christian Mysticism",
+        "Christian Theology",
+        "Gnosticism",
+        "Hermeticism",
+        "Kabbalah (Jewish Mysticism)",
+        "Mysticism (General)",
+        "Quranic Studies (Islam)",
+        "Rabbinic Thought (Judaism)",
+        "Shinto",
+        "Sufism (Islamic Mysticism)",
+        "Tibetan Buddhism",
+        "Vedanta (Hindu Philosophy)",
+        "Western Esotericism",
+        "Zen Buddhism",
+    ],
     "Historical & Contextual": ["Biographical", "Historical Context", "Reader-Response"],
 }
 
@@ -81,15 +99,27 @@ def flatten_lenses(lenses_hierarchy):
         flat_lenses.extend(lens_list)
     return sorted(list(set(flat_lenses))) # Use set to ensure uniqueness
 
-# Requirement 1: UI Evolution - Creating the functional mapping for the "Workshop" view
+# Requirement 1: Helper function for the new Multi-Stage selection UI
+def get_filtered_lenses(hierarchy, selected_categories):
+    """Filters lenses based on selected categories from a hierarchy."""
+    filtered_lenses = []
+    for category in selected_categories:
+        if category in hierarchy:
+            filtered_lenses.extend(hierarchy[category])
+    # Return a sorted list of unique lenses found across the selected categories
+    return sorted(list(set(filtered_lenses)))
+
 def create_functional_mapping(lenses_hierarchy):
     """Maps lenses from the hierarchy to the Three Tiers of Inquiry."""
     # This mapping defines the "Workshop" view (View by Function)
-    # It is defined statically here for clarity, mapping the expanded library.
+    # Updated for v7.1 to include the new Spiritual & Esoteric lenses.
     mapping = {
         "Contextual (What, Who, Where, When)": [
             "Biographical", "Historical Context", "Reader-Response",
-            "Epidemiology", "Supply Chain Analysis", "Astrophysics/Cosmology"
+            "Epidemiology", "Supply Chain Analysis", "Astrophysics/Cosmology",
+            # v7.1 additions
+            "Quranic Studies (Islam)",
+            "Rabbinic Thought (Judaism)",
         ],
         "Mechanical (How)": [
             "Formalist", "Structuralism", "Narratology", "Semiotics",
@@ -104,8 +134,23 @@ def create_functional_mapping(lenses_hierarchy):
             "Marxist", "Feminist", "Post-Colonial", "Queer Theory",
             "Utilitarianism", "Virtue Ethics", "Deontology (Kantian)", "Bioethics",
             "Ecocriticism",
-            "Buddhist Philosophy", "Western Esotericism", "Mysticism",
-            "Critical Legal Studies"
+            "Critical Legal Studies",
+            # v7.1 additions (replaces previous spiritual lenses)
+            "Animism",
+            "Bhakti Yoga (Hindu Devotion)",
+            "Buddhist Philosophy (General)",
+            "Christian Mysticism",
+            "Christian Theology",
+            "Gnosticism",
+            "Hermeticism",
+            "Kabbalah (Jewish Mysticism)",
+            "Mysticism (General)",
+            "Shinto",
+            "Sufism (Islamic Mysticism)",
+            "Tibetan Buddhism",
+            "Vedanta (Hindu Philosophy)",
+            "Western Esotericism",
+            "Zen Buddhism",
         ]
     }
     
@@ -125,6 +170,7 @@ def create_functional_mapping(lenses_hierarchy):
 
 # Initialize the functional mapping and the flattened list
 LENSES_FUNCTIONAL = create_functional_mapping(LENSES_HIERARCHY)
+# SORTED_LENS_NAMES is now primarily used for data integrity checks, not directly in the UI multiselects
 SORTED_LENS_NAMES = flatten_lenses(LENSES_HIERARCHY)
 
 
@@ -148,6 +194,7 @@ class WorkInput:
         return self.title if self.title else "(Untitled)"
 
 # --- GEMINI FUNCTIONS ---
+# (Gemini and Core Generation functions are unchanged from v7.0 but included for completeness)
 
 def get_model(api_key):
     """Configures and returns the Gemini model."""
@@ -359,12 +406,10 @@ def generate_analysis(model, lens_keyword, work_input: WorkInput):
                     logging.error(f"Failed to delete Gemini file: {e}")
 
 
-# Requirement 2: Dialogue & Synthesis Refinements (Strict Persona Naming and Bold Formatting)
-
 def generate_dialectical_synthesis(model, lens_a_name, analysis_a, lens_b_name, analysis_b, work_title):
     """Synthesizes two analyses of the SAME work into a dialectical dialogue."""
 
-    # The Synthesis Prompt (v7.0 update: Strict Persona Naming and Formatting)
+    # The Synthesis Prompt
     synthesis_prompt = textwrap.dedent(f"""
     You are tasked with creating a "Dialectical Dialogue" regarding the creative work titled "{work_title}". This dialogue must synthesize two distinct analytical perspectives.
 
@@ -381,10 +426,10 @@ def generate_dialectical_synthesis(model, lens_a_name, analysis_a, lens_b_name, 
     Instructions:
     1. **Format as Dialogue:** Create a structured conversation.
     2. **Determine Personas (Strict Requirement):** When determining personas, you must prioritize a title that directly incorporates the provided lens name.
-       For example:
-       - If the lens is 'Phenomenology', the title MUST be 'The Phenomenologist'.
-       - If the lens is 'Marxist', the title MUST be 'The Marxist Critic'.
-       - If the lens is 'Systems Theory', the title MUST be 'The Systems Theorist'.
+        For example:
+        - If the lens is 'Phenomenology', the title MUST be 'The Phenomenologist'.
+        - If the lens is 'Marxist', the title MUST be 'The Marxist Critic'.
+        - If the lens is 'Systems Theory', the title MUST be 'The Systems Theorist'.
     3. **Formatting:** All speaker names MUST be formatted in markdown bold (e.g., **The Marxist Critic:**).
     4. **Interaction:** The dialogue should explore the tensions, agreements, and gaps between the two analyses. The conversation should flow naturally, involving rebuttals and concessions.
     5. **Aufheben / Synthesis:** After the dialogue, provide a concluding section titled "## Aufheben / Synthesis". This section must resolve the tensions (thesis and antithesis) and offer a higher-level interpretation (synthesis).
@@ -416,15 +461,15 @@ def generate_symposium_synthesis(model, analyses_dict, work_title):
     for lens_name, analysis_text in analyses_dict.items():
         prompt_parts.append(f"<analysis lens='{lens_name}'>\n{analysis_text}\n</analysis>\n")
 
-    # Add the instructions (v7.0 update: Strict Persona Naming and Formatting)
+    # Add the instructions
     prompt_parts.append(textwrap.dedent("""
     --- Instructions ---
     1. **Format as Dialogue:** Create a structured conversation between the perspectives.
     2. **Determine Personas (Strict Requirement):** When determining personas, you must prioritize a title that directly incorporates the provided lens name.
-       For example:
-       - If the lens is 'Phenomenology', the title MUST be 'The Phenomenologist'.
-       - If the lens is 'Cognitive Science', the title MUST be 'The Cognitive Scientist'.
-       - If the lens is 'Systems Theory', the title MUST be 'The Systems Theorist'.
+        For example:
+        - If the lens is 'Phenomenology', the title MUST be 'The Phenomenologist'.
+        - If the lens is 'Cognitive Science', the title MUST be 'The Cognitive Scientist'.
+        - If the lens is 'Systems Theory', the title MUST be 'The Systems Theorist'.
     3. **Formatting:** All speaker names MUST be formatted in markdown bold (e.g., **The Cognitive Scientist:**).
     4. **Interaction and Flow:** The dialogue should be dynamic and exploratory. Participants must build upon each other's points, respectfully challenge interpretations, and explore the complexity of the work holistically. Ensure all perspectives are adequately represented.
     5. **Holistic Synthesis:** After the dialogue, provide a concluding section titled "## Holistic Synthesis". This section must summarize the key insights that emerged specifically from the interaction of all perspectives, offering a comprehensive understanding of the work.
@@ -482,7 +527,7 @@ if 'analysis_mode' not in st.session_state:
 if 'api_key' not in st.session_state:
     st.session_state.api_key = ""
 
-# --- SIDEBAR FOR SETUP & PROTOCOL SELECTION (v7.0 Redesign) ---
+# --- SIDEBAR FOR SETUP & PROTOCOL SELECTION (v7.1 Redesign) ---
 
 with st.sidebar:
     st.header("🏛️ Janus Protocol")
@@ -521,10 +566,10 @@ with st.sidebar:
 
     st.markdown("---")
     
-    # 3. Primary Control: Lens Selection (v7.0 UI Evolution)
+    # 3. Primary Control: Lens Selection (v7.1 UI Evolution)
     st.subheader("🔬 Lens Selection")
 
-    # --- Requirement 1: Implement "View As" Toggle and "Progressive Disclosure" Help ---
+    # --- Requirement 2: Help System Refinement for Progressive Disclosure ---
     
     # Layout for Toggle and Help Icon
     col_view, col_help = st.columns([4, 1])
@@ -535,8 +580,8 @@ with st.sidebar:
             "View Lenses As:",
             (VIEW_LIBRARY, VIEW_WORKSHOP),
             index=0,
-            # On Hover explanation
-            help="Switch between organizational views for lens selection." 
+            # Refined On Hover explanation (v7.1)
+            help="Switch views. Click the ❓ icon for details on the Library vs. Workshop structure." 
         )
 
     with col_help:
@@ -544,38 +589,36 @@ with st.sidebar:
         st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
         
         # On Click detailed explanation (Progressive Disclosure)
+        # Refined Popover Visuals: Condensed Content (v7.1)
         with st.popover("❓"):
-            st.markdown("### The Three Tiers of Inquiry")
-            st.markdown(
-                "The Janus Engine organizes analytical lenses functionally to aid strategic inquiry:"
-            )
-            st.markdown(
-                "**1. Contextual Lenses (What, Who, Where, When):**\n"
-                "Used to establish the background, environment, and factual basis of the work."
-            )
-            st.markdown(
-                "**2. Mechanical Lenses (How):**\n"
-                "Used to analyze the structure, form, composition, and functional mechanisms of the work."
-            )
-            st.markdown(
-                "**3. Interpretive Lenses (Why):**\n"
-                "Used to explore deeper meaning, philosophical implications, socio-political impact, and ethical considerations."
-            )
+            st.markdown("#### 🏛️ Library vs. Workshop")
+            st.markdown(f"**{VIEW_LIBRARY}:** Organized by academic discipline. Best for finding known frameworks.")
+            st.markdown(f"**{VIEW_WORKSHOP}:** Organized by function (The Three Tiers of Inquiry). Best for designing holistic strategies.")
+            
             st.markdown("---")
+            st.markdown("##### The Three Tiers of Inquiry")
+            # Aggressively condensed text using markdown bullet points
             st.markdown(
-                f"**{VIEW_LIBRARY}:** Best for finding known frameworks.\n"
-                f"**{VIEW_WORKSHOP}:** Best for designing a holistic analysis strategy."
+                """
+                * **1. Contextual (What/Who/When):** Establishes background and facts.
+                * **2. Mechanical (How):** Analyzes structure, form, and function.
+                * **3. Interpretive (Why):** Explores deeper meaning and implications.
+                """
             )
 
-    # Determine which hierarchy and labels to use based on the view mode
+    # Determine which hierarchy and labels to use based on the view mode (v7.1 Update for Multi-select)
     if view_mode == VIEW_LIBRARY:
         current_hierarchy = LENSES_HIERARCHY
-        category_label = "1. Discipline Category:"
-        placeholder_text = "Select a category..."
+        category_label_single = "1. Discipline Category:"
+        category_label_multi = "1. Select Discipline Categories:"
+        placeholder_text_single = "Select a category..."
+        placeholder_text_multi = "Select categories..."
     else:
         current_hierarchy = LENSES_FUNCTIONAL
-        category_label = "1. Functional Tier:"
-        placeholder_text = "Select a functional tier..."
+        category_label_single = "1. Functional Tier:"
+        category_label_multi = "1. Select Functional Tiers:"
+        placeholder_text_single = "Select a functional tier..."
+        placeholder_text_multi = "Select tiers..."
 
     # --- Lens Selection Widgets ---
 
@@ -587,10 +630,10 @@ with st.sidebar:
 
         # Using the dynamic hierarchy (Library or Workshop) for selection
         main_lens_category = st.selectbox(
-            category_label,
+            category_label_single,
             options=sorted(list(current_hierarchy.keys())),
             index=None,
-            placeholder=placeholder_text
+            placeholder=placeholder_text_single
         )
 
         if main_lens_category:
@@ -611,33 +654,57 @@ with st.sidebar:
         else:
             st.session_state.selection = None
 
-    elif analysis_mode == A_DIALECTICAL:
-        # Multi-select for dialectical dialogue (using the flattened list)
-        st.caption("Select exactly two lenses to synthesize.")
-        
-        # Note: For multi-select modes, we use the flat list SORTED_LENS_NAMES, 
-        # as the hierarchical view is less practical when selecting multiple disparate lenses.
-        
-        selected_lenses = st.multiselect(
-            "Select Lenses:",
-            options=SORTED_LENS_NAMES,
-            max_selections=2,
-            placeholder="Choose lenses..."
-        )
-        # Store the list of selections
-        st.session_state.selection = selected_lenses
+    # Requirement 1: Critical UI Bug Fix: Multi-Select Lens Selection (v7.1)
+    elif analysis_mode in [A_DIALECTICAL, A_SYMPOSIUM]:
+        # Implement Multi-Stage Selection respecting the current_hierarchy
 
-    elif analysis_mode == A_SYMPOSIUM:
-        # Multi-select for symposium (using the flattened list)
-        st.caption("Select three or more lenses for the symposium.")
-        
-        selected_lenses = st.multiselect(
-            "Select Lenses (Minimum 3):",
-            options=SORTED_LENS_NAMES,
-            placeholder="Choose lenses..."
+        # Determine constraints and labels
+        if analysis_mode == A_DIALECTICAL:
+            st.caption("Select exactly two lenses to synthesize.")
+            max_selections = 2
+            min_selections = 2
+            lens_label = "2. Select Exactly Two Lenses:"
+        else: # A_SYMPOSIUM
+            st.caption("Select three or more lenses for the symposium.")
+            max_selections = None # No max
+            min_selections = 3
+            lens_label = "2. Select Lenses (Minimum 3):"
+
+        # Stage 1: Category/Tier Selection
+        selected_categories = st.multiselect(
+            category_label_multi, # Use the dynamic multi-select label
+            options=sorted(list(current_hierarchy.keys())),
+            placeholder=placeholder_text_multi
         )
-        # Store the list of selections
-        st.session_state.selection = selected_lenses
+
+        # Stage 2: Filtered Lens Selection
+        if selected_categories:
+            # Dynamically populate the lens options using the helper function
+            available_lenses = get_filtered_lenses(current_hierarchy, selected_categories)
+            
+            # Use a container for visual nesting (v7.1 refinement)
+            with st.container(border=True):
+                selected_lenses = st.multiselect(
+                    lens_label,
+                    options=available_lenses,
+                    max_selections=max_selections,
+                    placeholder="Choose lenses from selected categories..."
+                )
+            
+            # Validation for minimum selection (Streamlit handles max, but we must check min)
+            if len(selected_lenses) > 0 and len(selected_lenses) < min_selections:
+                # If they started selecting but haven't met the minimum
+                st.warning(f"Please select at least {min_selections} lenses.")
+                st.session_state.selection = [] # Reset selection if invalid
+            elif len(selected_lenses) >= min_selections:
+                 # Valid selection
+                 st.session_state.selection = selected_lenses
+            else:
+                # No selections made yet
+                st.session_state.selection = []
+        else:
+            st.info("Select categories/tiers above to view available lenses.")
+            st.session_state.selection = []
 
 
 # --- MAIN PAGE LOGIC & DISPLAY ---
@@ -652,6 +719,8 @@ api_key = st.session_state.api_key
 
 # --- MODE-SPECIFIC LOGIC & UI SETUP ---
 
+# Note: The validation logic here relies on the sidebar correctly setting/unsetting st.session_state.selection
+
 if st.session_state.analysis_mode == A_SINGLE:
     selection = st.session_state.selection
     header_text = f"{A_SINGLE}"
@@ -661,34 +730,33 @@ if st.session_state.analysis_mode == A_SINGLE:
         header_text += f" | {selection}"
         st.info(f"Analyzing using the **{selection}** lens. The engine will dynamically generate the optimal prompt strategy based on the input work.")
     else:
-        # Updated message to reflect new UI terminology
         st.info("⬅️ Please select an analytical category/tier and specific lens from the sidebar to begin.")
 
 elif st.session_state.analysis_mode == A_DIALECTICAL:
     selection = st.session_state.selection
     header_text = f"{A_DIALECTICAL}"
 
+    # Check if selection exists AND the length is exactly 2 (v7.1 validation update)
     if selection and len(selection) == 2:
         display_analysis_form = True
         header_text += f" | {selection[0]} vs. {selection[1]}"
         st.info("Ready to synthesize these two distinct viewpoints on a single work.")
-    elif selection and len(selection) != 0:
-         st.warning("⬅️ Please select exactly two lenses in the sidebar.")
     else:
-        st.info("⬅️ Please select two lenses from the sidebar.")
+        # The sidebar handles the detailed warning if the count is wrong; this is the initial state message.
+        st.info("⬅️ Please select two lenses using the multi-stage selector in the sidebar.")
 
 elif st.session_state.analysis_mode == A_SYMPOSIUM:
     selection = st.session_state.selection
     header_text = f"{A_SYMPOSIUM}"
 
+    # Check if selection exists AND the length is 3 or more (v7.1 validation update)
     if selection and len(selection) >= 3:
         display_analysis_form = True
         header_text += f" | {len(selection)} Lenses"
         st.info(f"Ready to host a symposium between: {', '.join(selection)}")
-    elif selection and len(selection) != 0:
-         st.warning("⬅️ Please select at least three lenses in the sidebar.")
     else:
-        st.info("⬅️ Please select three or more lenses from the sidebar.")
+        # The sidebar handles the detailed warning if the count is wrong; this is the initial state message.
+        st.info("⬅️ Please select three or more lenses using the multi-stage selector in the sidebar.")
 
 elif st.session_state.analysis_mode == A_COMPARATIVE:
     selection = st.session_state.selection
