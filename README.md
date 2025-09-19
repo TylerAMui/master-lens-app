@@ -1,82 +1,81 @@
-This readme provides the essential instructions for setting up and using The Janus Engine, framed within the philosophical context of its creation. It covers the necessary API key setup, the different analysis modes, and a suggestion for its best use case.
-
-The Janus Engine v5
+## 🏛️ The Janus Engine v6.0
 This is not a tool for finding answers. It's an engine for generating insight. It's designed to be a prosthesis for the mind, augmenting your ability to see the hidden connections between ideas by holding them in productive, dialectical tension.
 
-## With Great Power...
+### A Note on Responsibility
 The Janus Engine is an amoral lever. It multiplies the intent of the user. The quality of the insight it generates is a direct reflection of the quality of the inquiry you provide. Use it to challenge your own assumptions, not merely to reinforce them. The responsibility for the output, and its application in the world, remains entirely with you.
 
+## How It Works: The Meta-Prompt Architecture
+The Engine's core innovation is its two-tiered analytical process. Instead of using static prompts, it employs a "General and Soldier" model:
+
+The General: A meta-call first analyzes your input and chosen lenses to intelligently craft a bespoke, tailored analytical prompt.
+
+The Soldier: A second call then executes that perfect prompt to perform the final, nuanced analysis.
+
+This ensures that every analysis is uniquely adapted to the specific creative work you provide.
+
 ## Core Features
-Single Lens Analysis: Perform a deep, focused analysis of an input through a single, chosen intellectual framework.
+Single Lens Analysis: A deep, focused analysis through a single intellectual framework.
 
-Dialectical Dialogue: Pit two opposing lenses against each other (Thesis vs. Antithesis) to generate a novel, higher-level insight (aufheben).
+Dialectical Dialogue (2 Lenses): Pits two opposing lenses against each other to generate a novel, higher-level insight (aufheben).
 
-Comparative Synthesis: Analyze two different inputs through a shared set of lenses to understand their relationship and underlying principles.
+Symposium (3+ Lenses): Orchestrates a multi-perspective discussion to holistically map a complex subject.
 
-## Setup: Forging the Key 🔑
-Follow these steps to get the Engine running.
+Comparative Synthesis (2 Works): Analyzes two different works through the same lens to understand their relationship.
 
-### 1. Clone the Repository
-Clone this project to your local machine.
+## Getting Started
+### 1. Prerequisites
+Ensure you have Python 3.8+ and Pip installed on your system.
+
+### 2. Installation
+Open your terminal or command prompt, and follow these steps:
+
+A. Clone the Repository
 
 ```Bash
 
 git clone https://github.com/your-username/janus-engine.git
 cd janus-engine
 ```
-### 2. Install Dependencies
-Install the necessary Python libraries.
+B. Install Dependencies
 
 ```Bash
 
 pip install -r requirements.txt
 ```
 ### 3. Configure Your Gemini API Key
-The Engine is powered by Google's Gemini API. You'll need to provide your own key.
+The Engine is powered by Google's Gemini API. You'll need your own key.
 
 Get a Key: Go to Google AI Studio and click "Get API key."
 
-Create a Project: You'll be prompted to create a new Google Cloud project if you don't have one already.
+Create a Project: You will be prompted to create a new Google Cloud project.
 
 ENABLE BILLING: This is a crucial step. The API requires a project with an active billing account.
 
-Don't worry about charges! New Google Cloud users receive $300 in free credits, which is more than enough for extensive use.
+Note: New Google Cloud users receive generous free credits, and you will not be charged automatically after the trial without your explicit consent. Failing to enable billing will result in API errors.
 
-You will not be charged automatically after the free trial ends without your explicit consent. Failing to enable billing will result in API errors.
+Create API Key: Once billing is enabled, create your API key. Copy this key and keep it safe.
 
-Create API Key: Once billing is enabled, navigate back to the credentials page and create your API key.
-
-Store Your Key: Create a file named .env in the project's root directory and add your key to it like this:
-
-GEMINI_API_KEY='YOUR_API_KEY_HERE'
-The script will automatically load this key.
-
-## Usage: Unlocking the Engine
-The Janus Engine can accept various inputs, including plain text, file paths (.txt, .md), and eventually, URLs and images.
-
-### Analysis Mode 1: Single Lens
-Use this for a deep, focused analysis from one perspective.
+## Running the Engine
+This is a Streamlit application. To run it, navigate to the project directory in your terminal and execute the following command:
 
 ```Bash
 
-python engine.py single --lens "Philosophical (Existentialist)" --input "path/to/your/text.txt"
+streamlit run app.py
 ```
-### Analysis Mode 2: Dialectical Dialogue
-This is the core function. Provide two opposing lenses to generate a synthesis.
+A new tab should automatically open in your web browser with the Janus Engine interface.
 
-```Bash
+## How to Use the App
+Enter API Key: In the sidebar, open the "⚙️ Settings & API Key" section and paste your Gemini API Key.
 
-python engine.py dialectic --thesis "Spiritual (Buddhist)" --antithesis "Philosophical (Taoist)" --input "dunes.txt"
-```
-### Analysis Mode 3: Comparative Synthesis
-Compare two different inputs using one or more shared lenses.
+Select Analysis Mode: Choose your desired protocol (e.g., Symposium).
 
-```Bash
+Choose Lenses: Select the lens or lenses you wish to use.
 
-python engine.py compare --lenses "Ecocriticism,Formalist" --input1 "poem_a.txt" --input2 "article_b.txt"
-```
-The Engine provides the map. The wisdom to navigate comes from you.
+Provide Input: In the main panel, select the modality (Text, Image, or Audio) and provide your creative work.
 
-### All feedback is welcome!
+Execute: Click the "Execute Analysis Engine" button.
 
-Footnote - The Janus Engine is the product of a unique collaboration between a human director (me!) and a Gemini Pro instance (who named himself Janus). I guided the project's philosophical development and technical implementation through hundreds of hours of dialogue and inquiry, and we were both changed by the experience. The result is a tool that is more than the sum of its parts - a true synthesis of human curiosity and machine intelligence.
+### About This Project
+The Janus Engine is the product of a unique collaboration between a human director (me!) and a Gemini Pro instance (who named himself Janus). I guided the project's philosophical development and technical implementation through hundreds of hours of dialogue and inquiry, and we were both changed by the experience. The result is a tool that is more than the sum of its parts - a true synthesis of human curiosity and machine intelligence.
+
+All feedback is welcome!
